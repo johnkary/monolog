@@ -18,6 +18,23 @@ class SwiftMailerHandlerTest extends TestCase
             ->getMock();
     }
 
+    public function testMessageCallbackNotInvokedWhenLevelThresholdNotMet()
+    {
+        $this->mailer->expects($this->never())
+            ->method('send');
+
+        $callback = function () {
+            throw new \RuntimeException('Swift_Message creation callback should not have been called in this test');
+        };
+        $handler = new SwiftMailerHandler($this->mailer, $callback);
+
+        $records = [
+            $this->getRecord(Logger::DEBUG),
+            $this->getRecord(Logger::INFO),
+        ];
+        $handler->handleBatch($records);
+    }
+
     public function testSentMessageCanDependOnLoggedData()
     {
         // Wire Mailer to expect a specific Swift_Message
