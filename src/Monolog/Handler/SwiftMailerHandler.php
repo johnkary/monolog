@@ -43,9 +43,12 @@ class SwiftMailerHandler extends MailHandler
     protected function send($content, array $records)
     {
         $message = null;
-        if (!$this->message instanceof \Swift_Message && is_callable($this->message)) {
+        if ($this->message instanceof \Swift_Message) {
+            $message = clone $this->message;
+        } else if (is_callable($this->message)) {
             $message = call_user_func($this->message, $content, $records);
         }
+
         if (!$message instanceof \Swift_Message) {
             throw new \InvalidArgumentException('Could not resolve message as instance of Swift_Message or a callable returning it');
         }
